@@ -1,0 +1,31 @@
+{{define "title"}}LOG IN {{end}}
+{{define "main"}}
+
+<form action="/user/login" method="POST" class="form-signin">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    {{range .Form.NonFieldError}}
+    <div class="errors">{{.}}</div>
+    {{end}}
+     <div class="formlogin">
+        <label>EMAIL:</label>
+        {{with index .Form.FieldsErrors "email"}}
+        <div class="errors">{{.}}</div>
+        {{end}}
+    
+        <input type="email" name="email" value="{{.Form.Email}}" class="form-control" placeholder="Email">
+
+    </div>
+    <div>
+        <label>PASSWORD:</label>
+        {{with index .Form.FieldsErrors "password"}}
+        <div class="errors">{{.}}</div>
+        {{end}}
+        <input type="password" name="password" value="{{.Form.Password}}">
+
+    </div>
+    <div>
+        <input type="submit" value="login">
+    </div>
+</form>
+
+{{end}}

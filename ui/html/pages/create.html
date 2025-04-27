@@ -1,0 +1,38 @@
+{{define "title"}}Create a Theory{{end}}
+
+{{define "main"}} 
+<form class="form" action="/snippet/create" method="post" >
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <div class="titleform">
+        <label>Title</label>
+        {{with index .Form.FieldsErrors "title"}}
+        <label class="error">{{.}}</label>
+        {{end}}
+        
+        <input type="text" name="title" value="{{.Form.Title}}">
+    </div>
+
+    <div class="contentform">
+        <label>Content</label>
+        {{with index .Form.FieldsErrors "content"}}
+        <label class="error">{{.}}</label>
+        {{end}}
+        <textarea name="content" >{{.Form.Content}}</textarea>
+    </div>
+    <div>
+        <p>DELETE In  a</p>
+        {{with index .Form.FieldsErrors "expires"}}
+ <label class='error'>{{.}}</label>
+ {{end}}
+
+        <input type="radio" name="expires" value="7" {{if (eq .Form.Expires 7)}}checked{{end}}> WEEK
+        <input type="radio" name="expires" value="30" {{if (eq .Form.Expires 30)}}checked{{end}}>  MONTH
+        <input type="radio" name="expires" value="365" {{if (eq .Form.Expires 365)}}checked{{end}}> YEAR
+    </div>
+    <div class="submitform">
+        <input type="submit" value="publish snippet">
+    </div>
+</form>
+
+{{end}}
+

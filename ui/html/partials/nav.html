@@ -1,0 +1,20 @@
+{{define "nav"}}
+
+<ul class="navbar">
+  <div>
+    {{if .IsAuthenticated}}
+     <a href="/snippet/create">Add Snippet </a>
+    {{end}}
+    </div>
+    <div>
+    {{if .IsAuthenticated}}
+    <form action="/user/logout" method="POST">
+      <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+      <button>Log out</button>
+    </form>
+    {{else}}
+     <a href="/user/login">Login</a>
+     <a href="/user/signup">Signup</a>
+    {{end}}
+  </div>
+{{end}}
