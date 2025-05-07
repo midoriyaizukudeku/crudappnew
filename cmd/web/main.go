@@ -16,6 +16,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 type Application struct {
@@ -29,6 +30,12 @@ type Application struct {
 }
 
 func main() {
+	// Load environment variables from .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	addr := os.Getenv("APP_ADDR")
 	if addr == "" {
 		log.Fatal("APP_ADDR is not set")
