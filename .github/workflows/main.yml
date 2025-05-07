@@ -27,15 +27,15 @@ jobs:
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
           echo "APP_ADDR=${{ secrets.APP_ADDR }}" >> .env
 
-      - name: Debug environment variables
-        run: cat .env
-
       - name: Decode TLS files
         run: |
           mkdir -p tls
           echo "${{ secrets.CA_PEM_PATH }}" | base64 -d > tls/ca.pem
           echo "${{ secrets.CERT_PEM_PATH }}" | base64 -d > tls/cert.pem
           echo "${{ secrets.KEY_PEM_PATH }}" | base64 -d > tls/key.pem
+
+      - name: Debug TLS files
+        run: ls -l tls/
 
       - name: Install dependencies
         run: go mod tidy

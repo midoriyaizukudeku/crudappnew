@@ -81,11 +81,17 @@ func main() {
 	}
 
 	// Load CA certificate
-	rootCertPool := x509.NewCertPool()
-	caPem, err := os.ReadFile(os.Getenv("CA_PEM_PATH"))
-	if err != nil {
-		errorLog.Fatal("Unable to read CA file:", err)
+	caPemPath := os.Getenv("CA_PEM_PATH")
+	if caPemPath == "" {
+		errorLog.Fatal("CA_PEM_PATH is not set")
 	}
+
+	caPem, err := os.ReadFile(caPemPath)
+	if err != nil {
+		errorLog.Fatalf("Unable to read CA file at %s: %v", caPemPath, err)
+	}
+
+	rootCertPool := x509.NewCertPool()
 	if ok := rootCertPool.AppendCertsFromPEM(caPem); !ok {
 		errorLog.Fatal("Failed to append CA certificate")
 	}
