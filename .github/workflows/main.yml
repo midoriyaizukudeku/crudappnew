@@ -13,11 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.23.4
-
       - name: Set environment variables
         run: |
           echo "DB_USER=${{ secrets.DB_USER }}" >> .env
@@ -26,6 +21,9 @@ jobs:
           echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
           echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
           echo "APP_ADDR=${{ secrets.APP_ADDR }}" >> .env
+          echo "CA_PEM_PATH=./tls/ca.pem" >> .env
+          echo "CERT_PEM_PATH=./tls/cert.pem" >> .env
+          echo "KEY_PEM_PATH=./tls/key.pem" >> .env
 
       - name: Decode TLS files
         run: |
