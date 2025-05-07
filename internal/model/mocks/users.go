@@ -22,11 +22,18 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 	return 0, model.InvalidCredientials
 }
 
-func (m *UserModel) Exist(id int) (bool, error) {
+func (m *UserModel) Exists(id int) (bool, error) {
 	switch id {
 	case 1:
 		return true, nil
 	default:
 		return false, nil
 	}
+}
+func (m *UserModel) InsertWithToken(name, email, password, token string) error {
+	return nil
+}
+
+func (m *UserModel) VerifyEmail(token string) error {
+	return nil
 }

@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+
 	"errors"
 	"strings"
 	"time"
@@ -13,7 +14,9 @@ import (
 type UserModelInterface interface {
 	Insert(name, email, password string) error
 	Authenticate(email, password string) (int, error)
-	Exist(id int) (bool, error)
+	Exists(id int) (bool, error)
+	// InsertWithToken(name, email, password, token string) error // Add this
+	// VerifyEmail(token string) error                            // Add this
 }
 
 type Users struct {
@@ -27,6 +30,8 @@ type Users struct {
 type UserModel struct {
 	DB *sql.DB
 }
+
+var ErrInvalidToken = errors.New("invalid verification token")
 
 func (m *UserModel) Insert(name, email, password string) error {
 	hassedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
@@ -71,7 +76,7 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 	}
 	return id, nil
 }
-func (m *UserModel) Exist(id int) (bool, error) {
+func (m *UserModel) Exists(id int) (bool, error) {
 	var exist bool
 
 	stmt := `SELECT EXISTS(SELECT true FROM users WHERE id = ?)`
@@ -79,3 +84,29 @@ func (m *UserModel) Exist(id int) (bool, error) {
 	err := m.DB.QueryRow(stmt, id).Scan(&exist)
 	return exist, err
 }
+
+// func (m *UserModel) InsertWithToken(name, email, password, token string) error {
+// 	stmt := `INSERT INTO users (name, email, hashed_password, verification_token, created)
+//     VALUES (?, ?, ?, ?, UTC_TIMESTAMP())`
+// 	_, err := m.DB.Exec(stmt, name, email, password, token)
+// 	return err
+// }
+
+// func (m *UserModel) VerifyEmail(token string) error {
+// 	stmt := `UPDATE users SET verified = TRUE, verification_token = NULL WHERE verification_token = ?`
+// 	result, err := m.DB.Exec(stmt, token)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	rowsAffected, err := result.RowsAffected()
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	if rowsAffected == 0 {
+// 		return ErrInvalidToken
+// 	}
+
+// 	return nil
+// }

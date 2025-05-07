@@ -29,9 +29,8 @@
         <input type="radio" name="expires" value="30" {{if (eq .Form.Expires 30)}}checked{{end}}>  MONTH
         <input type="radio" name="expires" value="365" {{if (eq .Form.Expires 365)}}checked{{end}}> YEAR
     </div>
-    <div class="submitform">
-        <input type="submit" value="publish snippet">
-    </div>
+    
+        <input  class="submitform" type="submit" value="publish snippet">
 </form>
 
 {{end}}

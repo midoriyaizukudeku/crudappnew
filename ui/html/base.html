@@ -9,18 +9,20 @@
 </head>
 {{template "nav" .}}
 <body>
-    <header>
+    <div class="header">
         {{with .Flash}}
-        <div class="flash">{{.}} </div>
-        {{end}}
-        <h1><a href="/">SnippetBOx</a></h1>
-    </header>
-    <main>
-        {{template "main" .}}
-    </main>
-    <footer>
-        <p>&copy; {{.CurrentYear}}</p>
-    </footer>
+    <div class="flash">{{.}} </div>
+    {{end}}
+        <h1><a href="/">SnippetBox</a></h1>
+    </div>
+    <div class="container">
+        <div class="content">
+            {{template "main" .}}
+        </div>
+        <div class="footer">
+            <p>&copy; {{.CurrentYear}}</p>
+        </div>
+    </div>
 </body>
 </html>
 {{end}}

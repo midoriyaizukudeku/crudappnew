@@ -2,9 +2,12 @@ package main
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
+	"net/smtp"
 	"runtime/debug"
 	"time"
 
@@ -78,4 +81,27 @@ func (app *Application) IsAuthenticated(r *http.Request) bool {
 		return false
 	}
 	return IsAuthenticated
+}
+
+func GenerateToken() (string, error) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(b), nil
+}
+
+func SendVerificationEmail(email, token string) error {
+	from := "your-email@example.com"
+	password := "your-email-password"
+	to := email
+	smtpHost := "smtp.example.com"
+	smtpPort := "587"
+
+	message := []byte(fmt.Sprintf("Subject: Verify Your Email\n\nClick the link to verify your email: http://localhost:8080/user/verify?token=%s", token))
+
+	auth := smtp.PlainAuth("", from, password, smtpHost)
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, message)
+	return err
 }

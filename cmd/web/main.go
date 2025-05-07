@@ -1,9 +1,126 @@
+// package main
+
+// import (
+// 	"crypto/tls"
+// 	"crypto/x509"
+// 	"database/sql"
+// 	"fmt"
+// 	"html/template"
+// 	"log"
+// 	"net/http"
+// 	"os"
+// 	"time"
+
+// 	"dream.website/internal/model"
+// 	"github.com/alexedwards/scs/mysqlstore"
+// 	"github.com/alexedwards/scs/v2"
+// 	"github.com/go-playground/form/v4"
+// 	_ "github.com/go-sql-driver/mysql"
+// 	"github.com/joho/godotenv"
+// )
+
+// type Application struct {
+// 	errorLog       *log.Logger
+// 	infoLog        *log.Logger
+// 	snippets       model.SnippetModel
+// 	Users          model.UserModelInterface
+// 	Templatecache  map[string]*template.Template
+// 	FormDecoder    *form.Decoder
+// 	SessionManager *scs.SessionManager
+// }
+
+// func main() {
+// 	// Load environment variables from .env file
+// 	err := godotenv.Load()
+// 	if err != nil {
+// 		log.Fatal("Error loading .env file")
+// 	}
+
+// 	addr := os.Getenv("APP_ADDR")
+// 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+// 		os.Getenv("DB_USER"),
+// 		os.Getenv("DB_PASSWORD"),
+// 		os.Getenv("DB_HOST"),
+// 		os.Getenv("DB_PORT"),
+// 		os.Getenv("DB_NAME"),
+// 	)
+
+// 	infoLog := log.New(os.Stdout, "INFO\t", log.Ltime|log.Ldate)
+// 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+// 	db, err := OpenDB(dsn)
+// 	if err != nil {
+// 		errorLog.Fatal(err)
+// 	}
+// 	defer db.Close()
+
+// 	Templatecache, err := NewTemplatecache()
+// 	if err != nil {
+// 		errorLog.Fatal(err)
+// 	}
+// 	formDecoder := form.NewDecoder()
+
+// 	SessionManager := scs.New()
+// 	SessionManager.Store = mysqlstore.New(db)
+// 	SessionManager.Lifetime = 12 * time.Hour
+// 	SessionManager.Cookie.Secure = true
+
+// 	app := &Application{
+// 		errorLog:       errorLog,
+// 		infoLog:        infoLog,
+// 		Users:          &model.UserModel{DB: db},
+// 		snippets:       &model.SnipppetModel{DB: db},
+// 		Templatecache:  Templatecache,
+// 		FormDecoder:    formDecoder,
+// 		SessionManager: SessionManager,
+// 	}
+
+// 	// Load CA certificate
+// 	rootCertPool := x509.NewCertPool()
+// 	caPem, err := os.ReadFile(os.Getenv("CA_PEM_PATH"))
+// 	if err != nil {
+// 		errorLog.Fatal("Unable to read CA file:", err)
+// 	}
+// 	if ok := rootCertPool.AppendCertsFromPEM(caPem); !ok {
+// 		errorLog.Fatal("Failed to append CA certificate")
+// 	}
+
+// 	tlsConfig := &tls.Config{
+// 		RootCAs:          rootCertPool,
+// 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+// 	}
+
+// 	srv := &http.Server{
+// 		Addr:         addr,
+// 		ErrorLog:     errorLog,
+// 		Handler:      app.Routes(),
+// 		TLSConfig:    tlsConfig,
+// 		IdleTimeout:  time.Minute,
+// 		ReadTimeout:  5 * time.Second,
+// 		WriteTimeout: 10 * time.Second,
+// 	}
+
+// 	err = srv.ListenAndServeTLS(os.Getenv("CERT_PEM_PATH"), os.Getenv("KEY_PEM_PATH"))
+// 	errorLog.Fatal(err)
+// }
+
+//	func OpenDB(dsn string) (*sql.DB, error) {
+//		db, err := sql.Open("mysql", dsn)
+//		if err != nil {
+//			return nil, err
+//		}
+//		if err = db.Ping(); err != nil {
+//			return nil, err
+//		}
+//		return db, nil
+//	}
 package main
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"database/sql"
-	"flag"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -28,24 +145,27 @@ type Application struct {
 }
 
 func main() {
+	addr := os.Getenv("APP_ADDR")
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
+	)
 
-	addr := flag.String("addr", ":8080", "HTTP NETWORK ACCESS")
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ltime|log.Ldate)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	flag.Parse()
-
-	infoLog := log.New(os.Stdout, "INFO/t", log.Ltime|log.Ldate)
-	errorLog := log.New(os.Stderr, "ERROR/t", log.Ldate|log.Ltime|log.Lshortfile)
-
-	db, err := OpenDB(*dsn)
+	db, err := OpenDB(dsn)
 	if err != nil {
-		log.Print(err)
+		errorLog.Fatal(err)
 	}
-
 	defer db.Close()
 
 	Templatecache, err := NewTemplatecache()
 	if err != nil {
-		log.Fatal(err)
+		errorLog.Fatal(err)
 	}
 	formDecoder := form.NewDecoder()
 
@@ -64,13 +184,23 @@ func main() {
 		SessionManager: SessionManager,
 	}
 
+	// Load CA certificate
+	rootCertPool := x509.NewCertPool()
+	caPem, err := os.ReadFile(os.Getenv("CA_PEM_PATH"))
+	if err != nil {
+		errorLog.Fatal("Unable to read CA file:", err)
+	}
+	if ok := rootCertPool.AppendCertsFromPEM(caPem); !ok {
+		errorLog.Fatal("Failed to append CA certificate")
+	}
+
 	tlsConfig := &tls.Config{
+		RootCAs:          rootCertPool,
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
 
 	srv := &http.Server{
-
-		Addr:         *addr,
+		Addr:         addr,
 		ErrorLog:     errorLog,
 		Handler:      app.Routes(),
 		TLSConfig:    tlsConfig,
@@ -79,7 +209,7 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+	err = srv.ListenAndServeTLS(os.Getenv("CERT_PEM_PATH"), os.Getenv("KEY_PEM_PATH"))
 	errorLog.Fatal(err)
 }
 
@@ -91,5 +221,5 @@ func OpenDB(dsn string) (*sql.DB, error) {
 	if err = db.Ping(); err != nil {
 		return nil, err
 	}
-	return db, err
+	return db, nil
 }

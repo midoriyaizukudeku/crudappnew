@@ -81,9 +81,9 @@ func (app *Application) CreateSnipprtPost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	form.CheckField(validator.NotBlank(form.Title), "title", "this firld cant be empty")
-	form.CheckField(validator.MaxChar(form.Title, 100), "title", "cant be more then 100 charecters")
-	form.CheckField(validator.NotBlank(form.Content), "content", "THis foeld cant be empty")
+	form.CheckField(validator.NotBlank(form.Title), "title", "This field cant be empty")
+	form.CheckField(validator.MaxChar(form.Title, 100), "title", "Title cant be more then 100 charecters")
+	form.CheckField(validator.NotBlank(form.Content), "content", "This field cant be empty")
 	form.CheckField(validator.PermittedValues(form.Expires, 7, 30, 365), "expires", "this field must be 7 , 30, 365")
 
 	if !form.Valid() {
@@ -139,7 +139,7 @@ func (app *Application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	err = app.Users.Insert(form.Name, form.Email, form.Password)
 	if err != nil {
 		if errors.Is(err, model.DuplicateEmail) {
-			form.AddFieldError("email", "Same email already in use ")
+			form.AddFieldError("email", "Same email already in use < Login instead")
 			data := app.newTemplateData(r)
 			data.Form = form
 			app.render(w, http.StatusUnprocessableEntity, "signup.html", data)
